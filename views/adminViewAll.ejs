@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apprentice Overview</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+    }
+    h1 {
+      margin-bottom: 0.5em;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 2em;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.6em;
+      text-align: center;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+  <h1>Apprentice Totals Overview</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Reg #</th>
+        <th>Email</th>
+        <th>Employer Hours</th>
+        <th>Total Hours</th>
+        <th>Class Hours</th>
+        <th>Points</th>
+        <th>Dashboard</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (apprentices && apprentices.length > 0) { %>
+        <% apprentices.forEach(apprentice => { %>
+          <tr>
+            <td><%= apprentice.name %></td>
+            <td><%= apprentice.reg %></td>
+            <td><%= apprentice.email || '—' %></td>
+            <td><%= apprentice.totalEmployerHours?.toFixed(2) || '0.00' %></td>
+            <td><%= apprentice.totalHours?.toFixed(2) || '0.00' %></td>
+            <td><%= apprentice.totalClassHours?.toFixed(2) || '0.00' %></td>
+            <td><%= apprentice.totalPoints || 0 %></td>
+            <td><a href="/admin/apprentice/<%= apprentice.reg %>">View</a></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="8">No apprentice data available.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>

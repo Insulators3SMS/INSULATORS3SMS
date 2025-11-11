@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Assess Points – Reg# <%= reg %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    iframe {
+      width: 100%;
+      height: 800px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+    }
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #006837;
+      font-weight: bold;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <h2>Assess Disciplinary Points for Reg# <%= reg %></h2>
+
+  <iframe
+    src="https://form.jotform.com/<%= formId %>?reg=<%= reg %>"
+    allowfullscreen
+  ></iframe>
+
+  <p><a href="/admin/apprentice/<%= reg %>">← Back to Dashboard</a></p>
+</body>
+</html>

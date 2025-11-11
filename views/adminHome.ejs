@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/adminHome.css" />
+</head>
+<body>
+  <!-- Background Blur Layer -->
+  <div class="background-blur"></div>
+
+  <!-- Semi-Transparent Overlay -->
+  <div class="background-overlay"></div>
+
+  <!-- Main Content -->
+  <div class="content">
+    <%- include('partials/header') %>
+    
+    <header>
+      <h1>Welcome, Admin</h1>
+      <p>Manage apprentices, view submissions, and track progress.</p>
+    </header>
+
+    <section class="dashboard-actions">
+      <a href="/admin/viewAll" class="btn">View All Apprentices</a>
+      <a href="/admin/addApprentice" class="btn">Manage Apprentices</a>
+      <a href="/admin/record-attendance" class="btn">Record Class Attendance</a>
+      <a href="/admin/record-employer-hours" class="btn">Record Employer Hours</a>
+
+      <!-- Add more admin actions here -->
+    </section>
+  </div>
+</body>
+</html>

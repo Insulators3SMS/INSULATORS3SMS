@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin View – <%= user.name %></title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    .section { margin-top: 30px; }
+    .toggle-header {
+      cursor: pointer;
+      background-color: #0d6d09; color: white;
+      padding: 10px;
+      font-weight: bold;
+      border: 1px solid #8d8b8b;
+    }
+    .table-container { display: none; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 12px; border: 1px solid #979393; text-align: left; }
+    th { background-color: #1c09c5; color: white; }
+    a.view-link { color: #d11010; text-decoration: none; }
+    a.view-link:hover { text-decoration: underline; }
+    .admin-buttons {
+      margin: 20px 0;
+      display: flex;
+      gap: 15px;
+    }
+    .admin-buttons a {
+      padding: 10px 16px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .admin-buttons a:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script>
+    function toggleTable(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img src="/images/logo.png" alt="Union Logo" style="max-width: 200px; height: auto;" />
+  </div>
+
+  <h2 style="text-align: center;">Admin View: Apprentice Dashboard</h2>
+
+  <div style="text-align: center; margin-bottom: 10px;">
+    <h2><%= user.name %></h2>
+    <p><strong>Reg#:</strong> <%= user.reg %></p>
+    <p><strong>Status:</strong> <%= apprenticeData.apprenticeStatus %></p>
+  </div>
+
+  <div class="admin-buttons" style="text-align: center; margin-bottom: 20px;">
+    <a href="/admin/advance/<%= user.reg %>" class="btn btn-success">Advance Apprentice</a>
+    <a href="/admin/points/<%= user.reg %>" class="btn btn-warning">Assess Points</a>
+  </div>
+
+  <div style="margin-left: 20px;">
+    <p><strong>Total Employer Hours:</strong> <%= apprenticeData.totalEmployerHours.toFixed(2) %></p>
+    <p><strong>Total Time Card Hours:</strong> <%= apprenticeData.totalHours.toFixed(2) %></p>
+    <p><strong>Total Class Hours:</strong> <%= apprenticeData.totalClassHours.toFixed(2) %></p>
+    <p><strong>Total Disciplinary Points:</strong> <%= apprenticeData.totalPoints %></p>
+  </div>
+  
+  <h3>Work Process Schedule</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Total Hours</th>
+        <th>Goal Hours</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (apprenticeData.categoryTotals && Object.keys(apprenticeData.categoryTotals).length > 0) { %>
+        <% Object.entries(apprenticeData.categoryTotals).forEach(([label, total]) => {
+             const goal = apprenticeData.goalHours?.[label] || 0;
+        %>
+          <tr>
+            <td><%= label %></td>
+            <td style="color: <%= total < goal ? 'red' : 'black' %>;"><%= total.toFixed(2) %></td>
+            <td><%= goal %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="3" style="text-align: center; font-style: italic; color: gray;">
+            No work process data available.
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <% const regKey = user.reg.toString(); %>
+
+  <% function renderHoursTable(submissions, formIdFilter, label, tableId) { %>
+    <div class="section">
+      <div class="toggle-header" onclick="toggleTable('<%= tableId %>')">
+        <%= label %> ▼
+      </div>
+      <div class="table-container" id="<%= tableId %>">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th><%= label %></th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% submissions.forEach(sub => {
+                 const answers = sub.answers || {};
+                 const value = answers[regKey];
+                 if (sub.formId === formIdFilter && value) {
+                   const rawMonth = answers['month_year'];
+                   const hasMonthYear = rawMonth && rawMonth.trim() !== '';
+                   const reportDate = hasMonthYear ? rawMonth : (sub.created_at?.split(' ')[0] || '—');
+                   const isFallback = !hasMonthYear;
+                   const viewLink = `https://www.jotform.com/submission/${sub.id}`;
+            %>
+              <tr>
+                <td style="<%= isFallback ? 'color: gray; font-style: italic;' : '' %>"><%= reportDate %></td>
+                <td><%= value %></td>
+                <td><a class="view-link" href="<%= viewLink %>" target="_blank">View</a></td>
+              </tr>
+            <% } }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <% function renderStandardTable(submissions, fieldKey, label, tableId) { %>
+    <div class="section">
+      <div class="toggle-header" onclick="toggleTable('<%= tableId %>')">
+        <%= label %> ▼
+      </div>
+      <div class="table-container" id="<%= tableId %>">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th><%= label %></th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% submissions.forEach(sub => {
+                 const answers = sub.answers || {};
+                 const value = answers[fieldKey];
+                 if (value) {
+                   const date = sub.created_at?.split(' ')[0] || '—';
+                   const viewLink = `https://www.jotform.com/submission/${sub.id}`;
+            %>
+              <tr>
+                <td><%= date %></td>
+                <td><%= value %></td>
+                <td><a class="view-link" href="<%= viewLink %>" target="_blank">View</a></td>
+              </tr>
+            <% } }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+  <% renderHoursTable(apprenticeData.submissions, '252059096099063', 'Employer Hours', 'table-employer'); %>
+  <% renderStandardTable(apprenticeData.submissions, 'totalHours', 'Time Card Hours', 'table-timecard'); %>
+  <% renderHoursTable(apprenticeData.submissions, '252274710275152', 'Class Hours', 'table-class'); %>
+  <% renderStandardTable(apprenticeData.submissions, 'calculation', 'Disciplinary Points', 'table-points'); %>
+
+  <p><a href="/logout">Logout</a></p>
+</body>
+</html>
