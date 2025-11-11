@@ -80,14 +80,35 @@ app.get('/dashboard', async (req, res) => {
   });
 });
 
-// 🏛️ Admin Dashboard
+// 🏛️ Admin Dashboard with sequential fetches
 app.get('/admin/home', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.redirect('/login.html');
   }
 
   const reg = req.session.user.reg;
-  const apprenticeData = await buildApprenticeData(reg);
+  const formConfigs = [
+    { id: process.env.FORM_ID_A, key: process.env.API_KEY_A },
+    { id: process.env.FORM_ID_B, key: process.env.API_KEY_B },
+    { id: process.env.FORM_ID_C, key: process.env.API_KEY_C },
+    { id: process.env.FORM_ID_D, key: process.env.API_KEY_D }
+  ];
+
+  let allSubmissions = [];
+
+  try {
+    for (const { id, key } of formConfigs) {
+      const subs = await fetchSubmissions(id, key);
+      allSubmissions.push(...subs);
+    }
+  } catch (err) {
+    console.error('Error fetching submissions:', err);
+    return res.status(500).send('Error loading admin dashboard.');
+  }
+
+  const parsedAnswers = allSubmissions.map(extractAnswers);
+  const expanded = expandBulkFormC(parsedAnswers);
+  const apprenticeData = groupSubmissionsByReg(expanded)[reg] || [];
 
   res.render('adminHome', {
     user: {
