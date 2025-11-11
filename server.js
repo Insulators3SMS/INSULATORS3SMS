@@ -1,3 +1,17 @@
+require('dotenv').config();
+require('dotenv').config();
+
+const FORM_ID_A = process.env.FORM_ID_A;
+const API_KEY_A = process.env.API_KEY_A;
+
+const FORM_ID_B = process.env.FORM_ID_B;
+const API_KEY_B = process.env.API_KEY_B;
+
+const FORM_ID_C = process.env.FORM_ID_C;
+const API_KEY_C = process.env.API_KEY_C;
+
+const FORM_ID_D = process.env.FORM_ID_D;
+const API_KEY_D = process.env.API_KEY_D;
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -110,4 +124,7 @@ app.get('/logout', (req, res) => {
 // 🚀 Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
+});
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
 });
