@@ -121,10 +121,14 @@ app.get('/logout', (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.send(`
+    <h2>Welcome to the Insulators Dashboard</h2>
+    <p><a href="/login.html">Go to Login</a></p>
+  `);
+});
+
 // 🚀 Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-});
-app.get('/', (req, res) => {
-  res.redirect('/login.html');
 });
