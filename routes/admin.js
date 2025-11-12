@@ -25,9 +25,6 @@ function extractAnswers(sub) {
   Object.values(sub.answers || {}).forEach(field => {
     if (field?.name && field.hasOwnProperty('answer')) {
       answers[field.name] = field.answer;
-      if (field.name === field.answer) {
-        answers['reg'] = field.name;
-      }
       if (field.name === 'reg') {
         answers['reg'] = field.answer;
       }
@@ -49,27 +46,36 @@ async function getAggregatedApprenticeData() {
 
   const apprentices = await Promise.all(
     userRecords.map(async user => {
-      const reg = user.reg.toString().trim();
-      const apprenticeData = await buildApprenticeData(reg);
-
-      return {
-        reg,
-        name: user.name || '—',
-        email: user.email || '',
-        totalHours: apprenticeData.totalHours,
-        totalPoints: apprenticeData.totalPoints,
-        totalEmployerHours: apprenticeData.totalEmployerHours,
-        totalClassHours: apprenticeData.totalClassHours
-      };
+      try {
+        const reg = user.reg.toString().trim();
+        const apprenticeData = await buildApprenticeData(reg);
+        return {
+          reg,
+          name: user.name || '—',
+          email: user.email || '',
+          totalHours: apprenticeData.totalHours,
+          totalPoints: apprenticeData.totalPoints,
+          totalEmployerHours: apprenticeData.totalEmployerHours,
+          totalClassHours: apprenticeData.totalClassHours
+        };
+      } catch (err) {
+        console.warn(`Failed to build data for ${user.name}:`, err);
+        return null;
+      }
     })
   );
 
-  return apprentices;
+  return apprentices.filter(a => a);
 }
 
 // 🏠 Admin homepage
 router.get('/', requireAdmin, (req, res) => {
-  res.render('adminHome');
+  res.render('adminHome', {
+    user: {
+      name: req.session.user.name,
+      reg: req.session.user.reg
+    }
+  });
 });
 
 // ➕➖ Add/Delete apprentice page
@@ -81,7 +87,7 @@ router.get('/manage-apprentices', requireAdmin, (req, res) => {
 router.get('/view-apprentices', requireAdmin, async (req, res) => {
   try {
     const apprentices = await getAggregatedApprenticeData();
-    res.render("adminViewAll", { apprentices });
+    res.render('adminViewAll', { apprentices });
   } catch (err) {
     console.error('Error loading apprentice roster:', err);
     if (!res.headersSent) {
@@ -89,6 +95,8 @@ router.get('/view-apprentices', requireAdmin, async (req, res) => {
     }
   }
 });
+
+// 📝 Record attendance
 router.get('/record-attendance', requireAdmin, (req, res) => {
   res.render('adminEmbedForm', {
     title: 'Record Class Attendance',
@@ -96,14 +104,16 @@ router.get('/record-attendance', requireAdmin, (req, res) => {
   });
 });
 
+// 🏗️ Record employer hours
 router.get('/record-employer-hours', requireAdmin, (req, res) => {
   res.render('adminEmbedForm', {
     title: 'Record Employer Hours',
     formUrl: 'https://form.jotform.com/252059096099063'
   });
 });
+
 // 📊 Aggregated apprentice dashboard
-router.get('/viewall', requireAdmin, async (req, res) => {
+router.get('/view-all', requireAdmin, async (req, res) => {
   try {
     const apprentices = await getAggregatedApprenticeData();
     res.render('adminViewAll', { apprentices });
@@ -115,7 +125,7 @@ router.get('/viewall', requireAdmin, async (req, res) => {
   }
 });
 
-// 👤 View individual apprentice dashboard (admin side)
+// 👤 View individual apprentice dashboard
 router.get('/apprentice/:reg', requireAdmin, async (req, res) => {
   const regKey = req.params.reg?.toString().trim();
   if (!regKey) return res.status(400).send('Missing apprentice reg number.');
@@ -137,6 +147,7 @@ router.get('/apprentice/:reg', requireAdmin, async (req, res) => {
   }
 });
 
+// 🚀 Advancement form
 router.get('/advance/:reg', requireAdmin, async (req, res) => {
   const regKey = req.params.reg?.toString().trim();
   if (!regKey) return res.status(400).send('Missing apprentice reg number.');
@@ -149,7 +160,6 @@ router.get('/advance/:reg', requireAdmin, async (req, res) => {
 
     if (!user) return res.status(404).send('Apprentice not found.');
 
-    // Embed Form E for advancement
     const jotformURL = `https://form.jotform.com/252385003600142?typeA22=${regKey}`;
 
     res.render('adminAdvanceApprentice', {
@@ -163,7 +173,7 @@ router.get('/advance/:reg', requireAdmin, async (req, res) => {
   }
 });
 
-// 🧮 Assess apprentice points (admin side)
+// 🧮 Assess apprentice points
 router.get('/points/:reg', requireAdmin, async (req, res) => {
   const regKey = req.params.reg?.toString().trim();
   if (!regKey) return res.status(400).send('Missing apprentice reg number.');
@@ -187,15 +197,3 @@ router.get('/points/:reg', requireAdmin, async (req, res) => {
 
     res.render('adminAssessPoints', {
       user,
-      reg: regKey,
-      formId: FORM_ID_B,
-      submissions: filtered,
-      totalPoints
-    });
-  } catch (err) {
-    console.error('Error loading points assessment:', err);
-    res.status(500).send('Failed to load apprentice points.');
-  }
-});
-
-module.exports = router;
