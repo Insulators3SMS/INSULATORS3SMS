@@ -15,11 +15,11 @@
 
   <!-- Main Content -->
   <div class="content">
-    <%- include('partials/header') %>
-    
+    <% include('partials/header') %>
+
     <header>
-      <h1>Welcome, Admin</h1>
-      <p>Manage apprentices, view submissions, and track progress.</p>
+      <h1>Welcome, <%= user.name %></h1>
+      <p>Manage apprentices, view submissions, and track progress for region <strong><%= user.reg %></strong>.</p>
     </header>
 
     <section class="dashboard-actions">
@@ -27,7 +27,6 @@
       <a href="/admin/addApprentice" class="btn">Manage Apprentices</a>
       <a href="/admin/record-attendance" class="btn">Record Class Attendance</a>
       <a href="/admin/record-employer-hours" class="btn">Record Employer Hours</a>
-
       <!-- Add more admin actions here -->
     </section>
   </div>
