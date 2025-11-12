@@ -18,8 +18,11 @@
     <% include('partials/header') %>
 
     <header>
-      <h1>Welcome, <%= user.name %></h1>
-      <p>Manage apprentices, view submissions, and track progress for region <strong><%= user.reg %></strong>.</p>
+      <h1>Welcome, <%= user?.name || 'Admin' %></h1>
+      <p>
+        Manage apprentices, view submissions, and track progress for region
+        <strong><%= user?.reg || 'N/A' %></strong>.
+      </p>
     </header>
 
     <section class="dashboard-actions">
