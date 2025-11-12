@@ -197,3 +197,15 @@ router.get('/points/:reg', requireAdmin, async (req, res) => {
 
     res.render('adminAssessPoints', {
       user,
+      reg: regKey,
+      formId: FORM_ID_B,
+      submissions: filtered,
+      totalPoints
+    });
+  } catch (err) {
+    console.error('Error loading points assessment:', err);
+    res.status(500).send('Failed to load apprentice points.');
+  }
+});
+
+module.exports = router;
