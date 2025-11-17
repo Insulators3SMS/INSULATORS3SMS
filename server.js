@@ -5,22 +5,21 @@ const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
 
-// 🧭 Routes
 const adminRoutes = require('./routes/admin');
 const apprenticeRoutes = require('./routes/apprentice');
 
-// 🛠️ Utils
 const {
   fetchSubmissions,
   extractAnswers,
   expandBulkFormC,
-  groupSubmissionsByReg
+  groupSubmissionsByReg,
+  FORM_ID_A, FORM_ID_B, FORM_ID_C, FORM_ID_D,
+  API_KEY_A, API_KEY_B, API_KEY_C, API_KEY_D
 } = require('./utils/jotformUtils');
-
 const { buildApprenticeData } = require('./utils/apprenticeDataBuilder');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 // 🧩 Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -40,12 +39,7 @@ app.use('/admin', adminRoutes);
 app.use('/apprentice', apprenticeRoutes);
 
 // 🔐 Load user credentials
-let users = [];
-try {
-  users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
-} catch (err) {
-  console.error('Failed to load users.json:', err);
-}
+const users = JSON.parse(fs.readFileSync('users.json', 'utf8'));
 
 // 🔐 Login route
 app.post('/login', (req, res) => {
@@ -80,59 +74,53 @@ app.get('/dashboard', async (req, res) => {
   });
 });
 
-// 🏛️ Admin Dashboard with sequential fetches
+// 🏛️ Admin Dashboard with error handling
 app.get('/admin/home', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.redirect('/login.html');
-  }
-
-  const reg = req.session.user.reg;
-  const formConfigs = [
-    { id: process.env.FORM_ID_A, key: process.env.API_KEY_A },
-    { id: process.env.FORM_ID_B, key: process.env.API_KEY_B },
-    { id: process.env.FORM_ID_C, key: process.env.API_KEY_C },
-    { id: process.env.FORM_ID_D, key: process.env.API_KEY_D }
-  ];
-
-  let allSubmissions = [];
-
   try {
-    for (const { id, key } of formConfigs) {
-      const subs = await fetchSubmissions(id, key);
-      allSubmissions.push(...subs);
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.redirect('/login.html');
     }
+
+    const reg = req.session.user.reg;
+    const submissions = await fetchSubmissions(FORM_ID_C, API_KEY_C);
+
+    const parsed = submissions
+      .filter(sub => sub && typeof sub.answers === 'object')
+      .map(sub => {
+        try {
+          return extractAnswers(sub);
+        } catch (err) {
+          console.warn('Failed to extract answers from submission:', sub?.id || 'unknown');
+          return null;
+        }
+      })
+      .filter(ans => ans);
+
+    const apprenticeData = expandBulkFormC(parsed);
+
+    res.render('adminHome', {
+      user: {
+        name: req.session.user.name,
+        reg
+      },
+      apprenticeData
+    });
   } catch (err) {
-    console.error('Error fetching submissions:', err);
-    return res.status(500).send('Error loading admin dashboard.');
+    console.error('Error rendering /admin/home:', err);
+    res.status(500).send(`
+      <h2>Admin Dashboard Error</h2>
+      <p>Something went wrong while loading your dashboard.</p>
+      <p><a href="/logout">Log out</a></p>
+    `);
   }
-
-  const parsedAnswers = allSubmissions.map(extractAnswers);
-  const expanded = expandBulkFormC(parsedAnswers);
-  const apprenticeData = groupSubmissionsByReg(expanded)[reg] || [];
-
-  res.render('adminHome', {
-    user: {
-      name: req.session.user.name,
-      reg
-    },
-    apprenticeData
-  });
 });
 
-// 🚪 Logout
+// 🚪 Logout route
 app.get('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) return res.send('Error logging out');
     res.redirect('/login.html');
   });
-});
-
-// 🏠 Root route
-app.get('/', (req, res) => {
-  res.send(`
-    <h2>Welcome to the Insulators Dashboard</h2>
-    <p><a href="/login.html">Go to Login</a></p>
-  `);
 });
 
 // 🚀 Start server

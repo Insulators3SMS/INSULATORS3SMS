@@ -113,7 +113,7 @@
 
   <% const regKey = user.reg.toString(); %>
 
-  <% function renderHoursTable(submissions, formIdFilter, label, tableId) { %>
+  <% function renderHoursTable(submissions, formIdFilter, label, tableId, dateFieldKey) { %>
     <div class="section">
       <div class="toggle-header" onclick="toggleTable('<%= tableId %>')"><%= label %> ▼</div>
       <div class="table-container" id="<%= tableId %>">
@@ -130,19 +130,31 @@
               const answers = sub.answers || {};
               const rawValue = answers[regKey];
               const value = (typeof rawValue === 'number' || typeof rawValue === 'string') && rawValue !== '' ? rawValue : null;
-
+              
+              console.log('🧾 formId:', sub.formId);
+              console.log('🧾 expected:', formIdFilter);
+              console.log('🧾 value:', value);
+              console.log('🧾 dateField:', answers[dateFieldKey]);
               if (sub.formId === formIdFilter && value !== null) {
+                console.log('🔍 answers:', answers);
+                console.log('🔍 classDate:', answers['classDate']);
+                console.log('🔍 date:', answers['date']);
                 let reportDate = sub.created_at?.split(' ')[0] || '—';
-                let isFallback = true;
+                const dateField = answers[dateFieldKey];
 
-                if (formIdFilter === '252059096099063' && answers['month_year']) isFallback = false;
-                if (formIdFilter === '252274710275152' && answers['typeA']) isFallback = false;
+                if (typeof dateField === 'object' && dateField !== null) {
+                  const { month, day, year } = dateField;
+                  if (month && day && year) {
+                    reportDate = `${month}/${day}/${year}`;
+                  }
+                } else if (typeof dateField === 'string' && dateField.trim()) {
+                  reportDate = dateField.trim();
+                }
 
                 const viewLink = `https://www.jotform.com/submission/${sub.id}`;
             %>
-              <% /* Wrap entire row in one block to preserve scope */ %>
               <tr>
-                <td style="<%= isFallback ? 'color: gray; font-style: italic;' : '' %>"><%= reportDate %></td>
+                <td><%= reportDate %></td>
                 <td><%= value %></td>
                 <td><a class="view-link" href="<%= viewLink %>" target="_blank">View</a></td>
               </tr>
@@ -171,14 +183,12 @@
               const value = answers[fieldKey];
               if (value) {
                 let date = sub.created_at?.split(' ')[0] || '—';
-                if (sub.formId === '240755677560162' && answers['monday1']) {
-                  const mondayDate = answers['monday1'];
-                  if (typeof mondayDate === 'object' && mondayDate !== null) {
-                    const { month, day, year } = mondayDate;
-                    if (month && day && year) date = `${month}/${day}/${year}`;
-                  } else if (typeof mondayDate === 'string') {
-                    date = mondayDate;
-                  }
+                const mondayDate = answers['monday1'];
+                if (typeof mondayDate === 'object' && mondayDate !== null) {
+                  const { month, day, year } = mondayDate;
+                  if (month && day && year) date = `${month}/${day}/${year}`;
+                } else if (typeof mondayDate === 'string') {
+                  date = mondayDate;
                 }
                 const viewLink = `https://www.jotform.com/submission/${sub.id}`;
             %>
@@ -194,11 +204,11 @@
     </div>
   <% } %>
 
-  <% renderHoursTable(apprenticeData.submissions, '252059096099063', 'Employer Hours', 'table-employer'); %>
+  <% renderHoursTable(apprenticeData.submissions, '252059096099063', 'Employer Hours', 'table-employer', 'date'); %>
   <% renderStandardTable(apprenticeData.submissions, 'totalHours', 'Time Card Hours', 'table-timecard'); %>
-  <% renderHoursTable(apprenticeData.submissions, '252274710275152', 'Class Hours', 'table-class'); %>
-    <% renderStandardTable(apprenticeData.submissions, 'calculation', 'Disciplinary Points', 'table-points'); %>
+  <% renderHoursTable(apprenticeData.submissions, '252274710275152', 'Class Hours', 'table-class', 'classDate'); %>
+  <% renderStandardTable(apprenticeData.submissions, 'calculation', 'Disciplinary Points', 'table-points'); %>
 
-  <p><a href="/logout">Logout</a></p>
+   <p><a href="/logout">Logout</a></p>
 </body>
 </html>

@@ -1,5 +1,3 @@
-// utils/jotformUtils.js
-
 const axios = require('axios');
 
 // ✅ Replace these with your actual form IDs and API keys
@@ -35,31 +33,32 @@ async function fetchSubmissions(formId, apiKey) {
     return [];
   }
 }
+
 function extractAnswers(sub) {
   const answers = {};
-  Object.values(sub.answers).forEach(field => {
-    if (field?.name && field?.hasOwnProperty('answer')) {
-      answers[field.name] = field.answer;
-      if (field.name === 'reg') {
-        answers['reg'] = field.answer;
-      }
+  for (const [key, field] of Object.entries(sub.answers || {})) {
+    const name = field?.name || key;
+    if (name) {
+      answers[name] = field.hasOwnProperty('answer') ? field.answer : field;
     }
-  });
+  }
   return answers;
 }
 
-function expandBulkFormC(sub) {
+function expandBulkFormC(sub, answers, formId) {
   const expanded = [];
-  const answers = extractAnswers(sub);
 
   Object.entries(answers).forEach(([key, value]) => {
     if (/^\d{5,}$/.test(key)) {
       expanded.push({
         ...sub,
-        formId: sub.form_id || FORM_ID_C,
+        formId,
         answers: {
           reg: key,
-          [key]: value
+          [key]: value,
+          date: answers['date'],
+          classDate: answers['classDate'],
+          memberName: answers['memberName']
         }
       });
     }

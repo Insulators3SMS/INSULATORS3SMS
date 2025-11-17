@@ -6,17 +6,28 @@ const router = express.Router();
 const requireApprentice = require('../middleware/requireApprentice');
 const requireAdmin = require('../middleware/requireAdmin');
 const { fetchSubmissions, extractAnswers } = require('../utils/jotformUtils');
+const { buildApprenticeData } = require('../utils/apprenticeDataBuilder');
 
 // 🧭 Apprentice Dashboard
-router.get('/dashboard', requireApprentice, (req, res) => {
-  const apprenticeData = req.apprenticeData;
-  const user = req.user;
+router.get('/dashboard', requireApprentice, async (req, res) => {
+  const user = req.session.user;
+  const reg = user?.reg;
 
-  res.render('dashboard', {
-    title: 'Apprentice Dashboard',
-    user,
-    apprenticeData
-  });
+  if (!reg) return res.status(400).send('Missing apprentice registration number.');
+
+  try {
+    const apprenticeData = await buildApprenticeData(reg);
+    console.log('✅ Sample answers:', apprenticeData.submissions[0]?.answers);
+
+    res.render('dashboard', {
+      title: 'Apprentice Dashboard',
+      user,
+      apprenticeData
+    });
+  } catch (err) {
+    console.error('Error building apprentice data:', err);
+    res.status(500).send('Failed to load apprentice dashboard.');
+  }
 });
 
 // 📝 Admin View: Time Cards by Apprentice Reg #

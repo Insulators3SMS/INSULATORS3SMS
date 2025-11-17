@@ -63,8 +63,28 @@ async function buildApprenticeData(reg) {
     fetchSubmissions(FORM_ID_E, API_KEY_E)
   ]);
 
-  const expandedC = subsC.flatMap(expandBulkFormC);
-  const expandedD = subsD.flatMap(expandBulkFormC);
+  const expandedC = subsC.flatMap(sub => {
+    const answers = extractAnswers(sub);
+    return expandBulkFormC(sub, answers, FORM_ID_C);
+  });
+
+  const expandedD = subsD.flatMap(sub => {
+    const answers = extractAnswers(sub);
+    return expandBulkFormC(sub, answers, FORM_ID_D);
+  });
+
+  if (expandedC.length > 0) {
+  console.log('✅ Sample Employer Hours submission:');
+  console.log('✅ Sample date:', expandedC[0]?.answers?.date);
+  console.log('✅ Sample classDate:', expandedC[0]?.answers?.classDate);
+}
+
+if (expandedD.length > 0) {
+  console.log('✅ Sample Class Hours submission:');
+  console.log('✅ Sample date:', expandedD[0]?.answers?.date);
+  console.log('✅ Sample classDate:', expandedD[0]?.answers?.classDate);
+}
+
 
   const allSubs = [
     ...subsA.map(sub => ({ ...sub, answers: extractAnswers(sub), formId: FORM_ID_A })),
@@ -74,6 +94,12 @@ async function buildApprenticeData(reg) {
   ];
 
   const grouped = groupSubmissionsByReg(allSubs, reg);
+
+  (grouped[reg]?.submissions || []).forEach(sub => {
+    console.log(`🧪 Submission ${sub.id}`);
+    console.log('Raw answers keys:', Object.keys(sub.answers || {}));
+  });
+
   const apprenticeData = grouped[reg] || {
     submissions: [],
     totalHours: 0,
@@ -105,6 +131,9 @@ async function buildApprenticeData(reg) {
 
   apprenticeData.apprenticeStatus = latestE?.answers?.[STATUS_FIELD]?.trim() || 'First Year Apprentice';
   apprenticeData.advancementLink = latestE ? `https://www.jotform.com/submission/${latestE.id}` : null;
+
+  console.log('🔍 Sample submission for reg', reg);
+  console.log(JSON.stringify(apprenticeData.submissions[0]?.answers, null, 2));
 
   return apprenticeData;
 }
