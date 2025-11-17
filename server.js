@@ -19,7 +19,7 @@ const {
 const { buildApprenticeData } = require('./utils/apprenticeDataBuilder');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // 🧩 Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -123,7 +123,17 @@ app.get('/logout', (req, res) => {
   });
 });
 
+// 🏠 Root route
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
+});
+
+// 🧱 404 fallback
+app.use((req, res) => {
+  res.status(404).send('<h2>404 - Page Not Found</h2><p><a href="/login.html">Return to login</a></p>');
+});
+
 // 🚀 Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
