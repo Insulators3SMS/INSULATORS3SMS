@@ -55,6 +55,7 @@
       opacity: 0.6;
     }
   </style>
+
   <script>
     function toggleTable(id) {
       const el = document.getElementById(id);
@@ -62,6 +63,7 @@
     }
   </script>
 </head>
+
 <body>
   <div style="text-align: center; margin-bottom: 20px;">
     <img src="/images/logo.png" alt="Union Logo" style="max-width: 200px; height: auto;" />
@@ -79,11 +81,14 @@
         <p><strong>Total Class Hours:</strong> <%= apprenticeData.totalClassHours.toFixed(2) %></p>
         <p><strong>Total Disciplinary Points:</strong> <%= apprenticeData.totalPoints %></p>
       </div>
+
       <div class="action-buttons">
         <a href="/apprentice/submit-timecard" class="btn">Submit Time Card</a>
+
         <% if (apprenticeData.advancementLink) { %>
           <a href="<%= apprenticeData.advancementLink %>" target="_blank" class="btn btn-outline-info btn-sm">See Last Advancement</a>
         <% } %>
+
         <a href="#" class="btn disabled">Raise Requirements</a>
       </div>
     </div>
@@ -113,7 +118,8 @@
 
   <% const regKey = user.reg.toString(); %>
 
-  <% function renderHoursTable(submissions, formIdFilter, label, tableId, dateFieldKey) { %>
+  <!-- UPDATED: renderHoursTable WITH showView FLAG -->
+  <% function renderHoursTable(submissions, formIdFilter, label, tableId, dateFieldKey, showView) { %>
     <div class="section">
       <div class="toggle-header" onclick="toggleTable('<%= tableId %>')"><%= label %> ▼</div>
       <div class="table-container" id="<%= tableId %>">
@@ -130,23 +136,14 @@
               const answers = sub.answers || {};
               const rawValue = answers[regKey];
               const value = (typeof rawValue === 'number' || typeof rawValue === 'string') && rawValue !== '' ? rawValue : null;
-              
-              console.log('🧾 formId:', sub.formId);
-              console.log('🧾 expected:', formIdFilter);
-              console.log('🧾 value:', value);
-              console.log('🧾 dateField:', answers[dateFieldKey]);
+
               if (sub.formId === formIdFilter && value !== null) {
-                console.log('🔍 answers:', answers);
-                console.log('🔍 classDate:', answers['classDate']);
-                console.log('🔍 date:', answers['date']);
                 let reportDate = sub.created_at?.split(' ')[0] || '—';
                 const dateField = answers[dateFieldKey];
 
                 if (typeof dateField === 'object' && dateField !== null) {
                   const { month, day, year } = dateField;
-                  if (month && day && year) {
-                    reportDate = `${month}/${day}/${year}`;
-                  }
+                  if (month && day && year) reportDate = `${month}/${day}/${year}`;
                 } else if (typeof dateField === 'string' && dateField.trim()) {
                   reportDate = dateField.trim();
                 }
@@ -156,7 +153,13 @@
               <tr>
                 <td><%= reportDate %></td>
                 <td><%= value %></td>
-                <td><a class="view-link" href="<%= viewLink %>" target="_blank">View</a></td>
+                <td>
+                  <% if (showView) { %>
+                    <a class="view-link" href="<%= viewLink %>" target="_blank">View</a>
+                  <% } else { %>
+                    —
+                  <% } %>
+                </td>
               </tr>
             <% } }) %>
           </tbody>
@@ -165,7 +168,8 @@
     </div>
   <% } %>
 
-  <% function renderStandardTable(submissions, fieldKey, label, tableId) { %>
+  <!-- UPDATED: renderStandardTable WITH showView FLAG -->
+  <% function renderStandardTable(submissions, fieldKey, label, tableId, showView) { %>
     <div class="section">
       <div class="toggle-header" onclick="toggleTable('<%= tableId %>')"><%= label %> ▼</div>
       <div class="table-container" id="<%= tableId %>">
@@ -181,21 +185,30 @@
             <% submissions.forEach(sub => {
               const answers = sub.answers || {};
               const value = answers[fieldKey];
+
               if (value) {
                 let date = sub.created_at?.split(' ')[0] || '—';
                 const mondayDate = answers['monday1'];
+
                 if (typeof mondayDate === 'object' && mondayDate !== null) {
                   const { month, day, year } = mondayDate;
                   if (month && day && year) date = `${month}/${day}/${year}`;
                 } else if (typeof mondayDate === 'string') {
                   date = mondayDate;
                 }
+
                 const viewLink = `https://www.jotform.com/submission/${sub.id}`;
             %>
               <tr>
                 <td><%= date %></td>
                 <td><%= value %></td>
-                <td><a class="view-link" href="<%= viewLink %>" target="_blank">View</a></td>
+                <td>
+                  <% if (showView) { %>
+                    <a class="view-link" href="<%= viewLink %>" target="_blank">View</a>
+                  <% } else { %>
+                    —
+                  <% } %>
+                </td>
               </tr>
             <% } }) %>
           </tbody>
@@ -204,11 +217,12 @@
     </div>
   <% } %>
 
-  <% renderHoursTable(apprenticeData.submissions, '252059096099063', 'Employer Hours', 'table-employer', 'date'); %>
-  <% renderStandardTable(apprenticeData.submissions, 'totalHours', 'Time Card Hours', 'table-timecard'); %>
-  <% renderHoursTable(apprenticeData.submissions, '252274710275152', 'Class Hours', 'table-class', 'classDate'); %>
-  <% renderStandardTable(apprenticeData.submissions, 'calculation', 'Disciplinary Points', 'table-points'); %>
+  <!-- CALLS WITH FLAGS -->
+  <% renderHoursTable(apprenticeData.submissions, '252059096099063', 'Employer Hours', 'table-employer', 'date', false); %>
+  <% renderStandardTable(apprenticeData.submissions, 'totalHours', 'Time Card Hours', 'table-timecard', true); %>
+  <% renderHoursTable(apprenticeData.submissions, '252274710275152', 'Class Hours', 'table-class', 'classDate', false); %>
+  <% renderStandardTable(apprenticeData.submissions, 'calculation', 'Disciplinary Points', 'table-points', true); %>
 
-   <p><a href="/logout">Logout</a></p>
+  <p><a href="/logout">Logout</a></p>
 </body>
 </html>
