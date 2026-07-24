@@ -75,6 +75,12 @@
     "password": "6547"
   },
   {
+    "name": "Jonathan Bungard",
+    "reg": "139172",
+    "username": "139172",
+    "password": "4731"
+  },
+  {
     "name": "Branden Calfee",
     "reg": "133767",
     "username": "133767",
@@ -87,12 +93,6 @@
     "password": "4690"
   },
   {
-    "name": "Brian Corrigan",
-    "reg": "128842",
-    "username": "128842",
-    "password": "8736"
-  },
-  {
     "name": "Bryan Didelot",
     "reg": "136027",
     "username": "136027",
@@ -103,12 +103,6 @@
     "reg": "134214",
     "username": "134214",
     "password": "8085"
-  },
-  {
-    "name": "Aaron Dowell",
-    "reg": "128848",
-    "username": "128848",
-    "password": "8315"
   },
   {
     "name": "Jeremiah Drake",
@@ -133,24 +127,6 @@
     "reg": "130023",
     "username": "130023",
     "password": "1958"
-  },
-  {
-    "name": "Angel Garcia",
-    "reg": "135327",
-    "username": "135327",
-    "password": "8908"
-  },
-  {
-    "name": "Benjamin Garcia",
-    "reg": "135328",
-    "username": "135328",
-    "password": "5271"
-  },
-  {
-    "name": "Jose Gonzalez",
-    "reg": "134216",
-    "username": "134216",
-    "password": "8224"
   },
   {
     "name": "Andrew Greene",
@@ -201,12 +177,6 @@
     "password": "9836"
   },
   {
-    "name": "DeAarron King",
-    "reg": "136028",
-    "username": "136028",
-    "password": "1044"
-  },
-  {
     "name": "Zaine Kistner",
     "reg": "128935",
     "username": "128935",
@@ -219,10 +189,10 @@
     "password": "6019"
   },
   {
-    "name": "Jordan Kyles",
-    "reg": "136838",
-    "username": "136838",
-    "password": "3510"
+    "name": "Izaak Lucan",
+    "reg": "138759",
+    "username": "138759",
+    "password": "6163"
   },
   {
     "name": "SiAiria McIntosh",
@@ -247,12 +217,6 @@
     "reg": "136111",
     "username": "136111",
     "password": "8912"
-  },
-  {
-    "name": "Aidan Mullen",
-    "reg": "126189",
-    "username": "126189",
-    "password": "1780"
   },
   {
     "name": "Earl Nash",
@@ -303,12 +267,6 @@
     "password": "4353"
   },
   {
-    "name": "Anthony Santaella",
-    "reg": "136601",
-    "username": "136601",
-    "password": "8034"
-  },
-  {
     "name": "Brandon Santangelo",
     "reg": "136113",
     "username": "136113",
@@ -337,12 +295,6 @@
     "reg": "134364",
     "username": "134364",
     "password": "2079"
-  },
-  {
-    "name": "Avery Tucker",
-    "reg": "128839",
-    "username": "128839",
-    "password": "0548"
   },
   {
     "name": "Sergio Vega",
@@ -379,18 +331,6 @@
     "reg": "131805",
     "username": "131805",
     "password": "3515"
-  },
-  {
-    "name": "Randy Wright",
-    "reg": "128841",
-    "username": "128841",
-    "password": "8362"
-  },
-  {
-    "name": "Scott Wright Jr",
-    "reg": "128849",
-    "username": "128849",
-    "password": "8363"
   },
   {
     "name": "Joseph Yoon",
