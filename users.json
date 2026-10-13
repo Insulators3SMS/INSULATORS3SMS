@@ -57,12 +57,6 @@
     "password": "8022"
   },
   {
-    "name": "Amanda Belluardo",
-    "reg": "136600",
-    "username": "136600",
-    "password": "2288"
-  },
-  {
     "name": "Archavis Bishop",
     "reg": "139492",
     "username": "139492",
@@ -105,22 +99,10 @@
     "password": "4690"
   },
   {
-    "name": "Bryan Didelot",
-    "reg": "136027",
-    "username": "136027",
-    "password": "5144"
-  },
-  {
     "name": "Deon Dixon",
     "reg": "134214",
     "username": "134214",
     "password": "8085"
-  },
-  {
-    "name": "Phillip Dorko",
-    "reg": "139496",
-    "username": "139496",
-    "password": "2529"
   },
   {
     "name": "Jeremiah Drake",
@@ -171,7 +153,7 @@
     "password": "7777"
   },
   {
-    "name": "Davis Husarcik",
+    "name": "David Husarcik",
     "reg": "136837",
     "username": "136837",
     "password": "8284"
